@@ -1,0 +1,163 @@
+/* Global */
+body {
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f8f9fc;
+  margin: 0;
+  color: #333;
+}
+
+/* Sidebar */
+.sidebar {
+  background: #1f2937; /* Dark gray */
+  min-height: 100vh;
+  width: 250px;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1rem;
+}
+
+/* Sidebar Brand */
+.sidebar h5 {
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 18px;
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+
+/* Sidebar Links */
+.sidebar .nav-link {
+  color: #9ca3af;
+  padding: 12px 15px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  margin: 3px 0;
+}
+
+.sidebar .nav-link i {
+  font-size: 18px;
+  margin-right: 10px;
+  color: #9ca3af;
+  transition: 0.3s;
+}
+
+/* Hover & Active */
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  background: rgba(59, 130, 246, 0.15);
+  color: #fff;
+}
+
+.sidebar .nav-link:hover i,
+.sidebar .nav-link.active i {
+  color: #3b82f6;
+}
+
+/* Collapse Submenu */
+.sidebar .collapse .nav-link {
+  padding-left: 35px;
+  font-size: 14px;
+}
+
+/* Chevron Rotation */
+.sidebar .nav-link[aria-expanded="true"] .bi-chevron-down {
+  transform: rotate(180deg);
+  transition: 0.3s;
+}
+
+/* Top Navbar */
+.navbar {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  padding: 0.75rem 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.navbar .navbar-brand {
+  font-weight: 600;
+  font-size: 18px;
+  color: #1f2937;
+}
+
+.navbar i {
+  font-size: 18px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.navbar i:hover {
+  color: #0d6efd;
+}
+
+.navbar .dropdown-toggle::after {
+  display: none;
+}
+
+.navbar .dropdown-menu {
+  border-radius: 10px;
+  border: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.navbar .dropdown-item {
+  font-size: 14px;
+  padding: 8px 15px;
+  transition: 0.2s;
+}
+
+.navbar .dropdown-item:hover {
+  background-color: #f1f5f9;
+  color: #0d6efd;
+}
+
+/* Main Content */
+.content {
+  padding: 20px;
+}
+
+/* Dashboard Cards */
+.card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease-in-out;
+}
+
+.card h6 {
+  font-weight: 600;
+  margin-top: 10px;
+  color: #444;
+}
+
+.card i {
+  font-size: 19px;
+}
+
+/* Status Badges */
+.status-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.status-notstarted {
+  background-color: #ffe6ea;
+  color: #d6336c;
+}
+
+.status-progress {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-completed {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
