@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container mt-4">
-        <div class="card shadow-sm border-0 rounded-4">
+        <div class="card shadow-sm border-0 rounded-4s">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-bag-check me-2"></i> Products List</h5>
                 <a href="{{ route('pos.products.create') }}" class="btn btn-light btn-sm">
@@ -16,7 +16,6 @@
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 @endif
-
                 <div class="table-responsive">
                     <table class="table table-striped table-hover table-sm align-middle text-center">
                         <thead class="table-dark">
@@ -98,11 +97,9 @@
                         </tbody>
                     </table>
                 </div>
-
-
                 {{-- Pagination --}}
-                <div class="d-flex justify-content-end mt-3">
-                    {{-- {{ $products->links() }} --}}
+                <div class="d-flex justify-content-center mt-3">
+                    {{ $products->links('pagination::bootstrap-5') }}
                 </div>
             </div>
         </div>
@@ -157,8 +154,6 @@
                     }
                 });
             });
-
-
 
         });
     </script>

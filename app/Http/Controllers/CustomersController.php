@@ -8,21 +8,8 @@ use App\Models\Customer;
 class CustomersController extends Controller
 {
 
-    // public function toggleStatus($id)
-    // {
-    //     $customer = Customer::findOrFail($id);
-    //     $customer->status = !$customer->status; // flip status
-    //     $customer->save();
 
-    //     if (request()->ajax()) {
-    //         return response()->json([
-    //             'success' => true,
-    //             'status' => $customer->status ? 'Active' : 'Inactive'
-    //         ]);
-    //     }
 
-    //     return redirect()->back()->with('success', 'Customer status updated!');
-    // }
     public function toggleStatus($id)
     {
         $customer = Customer::findOrFail($id);
@@ -62,16 +49,23 @@ class CustomersController extends Controller
 
         Customer::create($request->all());
 
-        return redirect()->route('customer.list')->with('success', 'Customer added successfully!');
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'customer added successfully!'
+            ]);
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $customer = Customer::findOrFail($id);
+        return response()->json($customer);
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -98,17 +92,25 @@ class CustomersController extends Controller
 
         $customer->update($request->only(['first_name', 'last_name', 'email', 'phone']));
 
-        return redirect()->route('customer.list')->with('success', 'Customer updated successfully!');
+
+        return response()->json(['success' => true, 'customer' => $customer]);
+        // return redirect()->route('customer.list')->with('success', 'Customer updated successfully!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request,string $id)
     {
         $customer = Customer::findOrFail($id);
         $customer->delete();
 
-        return redirect()->route('customer.list')->with('success', 'Customer deleted successfully!');
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'customer deleted successfully!'
+            ]);
+        }
     }
 }

@@ -76,12 +76,6 @@
     <script>
         $(document).ready(function() {
 
-            $.ajaxSetup({
-                headers: {
-                    'X-CSRF-TOKEN': $('input[name="_token"]').val()
-                }
-            });
-
             $('#productForm').on('submit', function(e) {
                 e.preventDefault();
 

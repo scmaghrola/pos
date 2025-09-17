@@ -5,7 +5,8 @@
 
             <!-- Dashboard -->
             <li>
-                <a href="{{ route('pos.dashboard') }}" class="nav-link {{ Request::routeIs('pos.dashboard') ? 'active' : '' }}">
+                <a href="{{ route('pos.dashboard') }}"
+                    class="nav-link {{ Request::routeIs('pos.dashboard') ? 'active' : '' }}">
                     <i class="bi bi-speedometer2 me-2"></i>Dashboard
                 </a>
             </li>
@@ -108,7 +109,8 @@
 
             <!-- POS -->
             <li>
-                <a href="#" class="nav-link">
+                <a href="{{ route('pos-page.list') }}"
+                    class="nav-link {{ Request::routeIs('pos-page.list') ? 'active' : '' }}">
                     <i class="bi bi-cart2 me-2"></i>POS
                 </a>
             </li>

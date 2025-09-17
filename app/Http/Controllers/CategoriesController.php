@@ -14,7 +14,7 @@ class CategoriesController extends Controller
      */
     public function index()
     {
-        $categories = Category::with('parent')->paginate(10);
+        $categories = Category::with('parent')->paginate(3);
         return view('pos.category_list', compact('categories'));
     }
 
@@ -62,16 +62,32 @@ class CategoriesController extends Controller
     /**
      * Show the form for editing a category.
      */
-    public function edit($id)
+    public function edit(Request $request, $id)
     {
         $category = Category::findOrFail($id);
         $categories = Category::with('children')
             ->whereNull('parent_id')
-            ->where('id', '!=', $id) // prevent self-parent
+            ->where('id', '!=', $id)
             ->get();
 
-        return view('pos.edit_category', compact('category', 'categories'));
+        if ($request->ajax()) {
+            return response()->json([
+                'category' => $category,
+                'categories' => $categories
+            ]);
+        }
+        return $categories;
+
+        // return view('pos.edit_category', compact('category', 'categories'));
     }
+
+    public function show(Category $category)
+    {
+        return response()->json([
+            'category' => $category
+        ]);
+    }
+
 
     /**
      * Update the specified category.
@@ -125,17 +141,11 @@ class CategoriesController extends Controller
     }
 
     // Toggle status
-    public function toggleStatus(Request $request, $id)
+    public function toggleStatus(Category $category)
     {
-        $category = Category::findOrFail($id);
         $category->status = !$category->status;
         $category->save();
 
-        return $request->ajax()
-            ? response()->json([
-                'message' => 'Category status updated successfully',
-                'status' => $category->status
-            ])
-            : redirect()->back()->with('success', 'Category status updated successfully');
+        return response()->json(['status' => $category->status]);
     }
 }

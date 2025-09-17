@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\PosController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -36,7 +38,8 @@ Route::prefix('admin')->group(function () {
 
 
 
-
+    Route::patch('admin/categories/{category}/toggle-status', [CategoriesController::class, 'toggleStatus'])
+        ->name('category.toggleStatus');
     Route::resource('admin/categories', CategoriesController::class)->names([
         'index' => 'category.list',
         'create' => 'category.add',
@@ -47,9 +50,8 @@ Route::prefix('admin')->group(function () {
         'destroy' => 'categories.destroy',
     ]);
 
-    Route::patch('admin/categories/{category}/toggle-status', [CategoriesController::class, 'toggleStatus'])
-        ->name('category.toggleStatus');
 
+    Route::post('/customers/{id}/toggle-status', [CustomersController::class, 'toggleStatus'])->name('customer.toggle');
     Route::resource('customers', CustomersController::class)->names([
         'index' => 'customer.list',
         'create' => 'customer.add',
@@ -59,5 +61,14 @@ Route::prefix('admin')->group(function () {
         'update' => 'customer.update',
         'destroy' => 'customer.destroy',
     ]);
-    Route::post('/customers/{id}/toggle-status', [CustomersController::class, 'toggleStatus'])->name('customer.toggle');
+
+    Route::resource('pos-page', PosController::class)->names([
+        'index' => 'pos-page.list',
+        'create' => 'pos-page.add',
+        'store' => 'pos-page.store',
+        'show' => 'pos-page.show',
+        'edit' => 'pos-page.edit',
+        'update' => 'pos-page.update',
+        'destroy' => 'pos-page.destroy',
+    ]);
 });
