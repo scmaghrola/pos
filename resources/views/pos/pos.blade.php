@@ -79,11 +79,12 @@
         const productListEl = document.getElementById('productList');
         const cartItemsEl = document.getElementById('cartItems');
         const cartTotalEl = document.getElementById('cartTotal');
-        let cart =[]
+        var activeUser = "user1";
+        let cart = {"user1": []};
 
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
-            
+            const activeCart = cart[activeUser]
             const cartItem = activeCart.find(item => item.id === productId);
 
             if (cartItem) {
@@ -98,7 +99,7 @@
         }
 
         function removeFromCart(productId) {
-            
+            const activeCart = cart[activeUser]
             cart = cart.filter(item => item.id !== productId);
             updateCart();
         }
@@ -107,6 +108,7 @@
             cartItemsEl.innerHTML = '';
             let total = 0;
 
+             const activeCart = cart[activeUser]
             activeCart.forEach(item => {
                 total += item.price * item.qty;
                 const tr = document.createElement('tr');
