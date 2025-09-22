@@ -5,6 +5,8 @@ use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\PosController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,9 +21,7 @@ use App\Http\Controllers\PosController;
 
 Route::prefix('admin')->group(function () {
 
-    Route::get('/dashboard', function () {
-        return view('pos.dashboard');
-    })->name('pos.dashboard');
+    Route ::get('/dashboard',[DashboardController::class,'index'])->name('pos.dashboard');
 
 
     Route::patch('products/{product}/toggle-status', [ProductsController::class, 'toggleStatus'])
@@ -71,4 +71,10 @@ Route::prefix('admin')->group(function () {
         'update' => 'pos-page.update',
         'destroy' => 'pos-page.destroy',
     ]);
+
+    Route::get('orders', [OrderController::class, 'index'])->name('orders.list');
+
+    Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.view');
+
+    Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.delete');
 });

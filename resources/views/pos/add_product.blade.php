@@ -46,9 +46,16 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
+                    {{-- <div class="mb-3">
                         <label for="image" class="form-label fw-semibold">Product Image</label>
                         <input type="file" name="image" id="image" class="form-control" accept="image/*">
+                    </div> --}}
+
+                    <!-- Dropzone Form -->
+                    <div class="mb-3">
+                        <label for="myDropzone" class="form-label fw-semibold">Product Image</label>
+                        <div class="dropzone" id="myDropzone"></div>
+
                     </div>
 
                     <div class="row">
@@ -73,6 +80,19 @@
     </div>
 @endsection
 @section('scripts')
+    <script>
+        Dropzone.autoDiscover = false; // prevent auto init
+
+        var myDropzone = new Dropzone("#myDropzone", {
+            url: "{{ route('pos.products.store') }}",
+            paramName: "image", // name of the input
+            maxFilesize: 5, // MB
+            acceptedFiles: "image/*",
+            addRemoveLinks: true
+        });
+    </script>
+
+    </script>
     <script>
         $(document).ready(function() {
 

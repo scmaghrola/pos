@@ -5,7 +5,7 @@
         <div class="card shadow-sm rounded-4 border-0">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="bi bi-people me-2"></i>Customers List</h5>
-                <!-- Updated Add Customer button to trigger modal -->
+
                 <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
                     <i class="bi bi-plus-circle me-1"></i> <b>Add Customer</b>
                 </button>
@@ -40,8 +40,8 @@
                                         </span>
                                     </td>
                                     <td class="d-flex justify-content-center gap-2">
-                                        <!-- Edit -->
 
+                                        <!-- Edit -->
                                         <button type="button" class="btn btn-warning btn-sm edit-btn"
                                             data-id="{{ $customer->id }}">
                                             <i class="bi bi-pencil-square"></i>
@@ -188,6 +188,27 @@
 
 @section('scripts')
     <script>
+        //  form submission via AJAX
+        $('#addCustomerForm').on('submit', function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(data) {
+                    if (data.success) {
+                        $('#addCustomerModal').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error: ' + xhr.responseText);
+                }
+            });
+        });
+
         // Delete with AJAX
         function deleteCustomer(customerId) {
             if (!confirm('Are you sure?')) return;
@@ -207,6 +228,54 @@
                 }
             });
         }
+
+
+        // Open Edit Modal & Prefill Data
+        $(document).on('click', '.edit-btn', function() {
+            let id = $(this).data('id');
+
+            $.get("{{ route('customer.show', ':id') }}".replace(':id', id), function(customer) {
+                // Prefill modal fields
+                $('#edit_customer_id').val(customer.id);
+                $('#edit_first_name').val(customer.first_name);
+                $('#edit_last_name').val(customer.last_name);
+                $('#edit_email').val(customer.email);
+                $('#edit_phone').val(customer.phone);
+                $('#edit_status').val(customer.status);
+
+                // Set form action URL
+                $('#editCustomerForm').attr('action', "{{ route('customer.update', ':id') }}".replace(
+                    ':id', id));
+
+                // Show modal
+                $('#editCustomerModal').modal('show');
+            });
+        });
+
+
+        // Submit Edit Form via AJAX
+        $('#editCustomerForm').on('submit', function(e) {
+            e.preventDefault();
+            let form = $(this);
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                success: function(res) {
+                    if (res.success) {
+                        $('#editCustomerModal').modal('hide');
+                        location.reload(); // later we can update row without reload
+                    } else {
+                        alert(res.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert('Error: ' + xhr.responseText);
+                }
+            });
+        });
+
 
         // Toggle Status with AJAX
         $(document).on('click', '.toggle-status-btn', function() {
@@ -239,73 +308,8 @@
             });
         });
 
-        // Optional: Handle form submission via AJAX (if you want to keep the modal experience seamless)
-        $('#addCustomerForm').on('submit', function(e) {
-            e.preventDefault();
-            $.ajax({
-                url: $(this).attr('action'),
-                type: 'POST',
-                data: $(this).serialize(),
-                success: function(data) {
-                    if (data.success) {
-                        // Close the modal
-                        $('#addCustomerModal').modal('hide');
-                        // Optionally reload the page or append the new customer to the table
-                        location.reload();
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                },
-                error: function(xhr) {
-                    alert('Error: ' + xhr.responseText);
-                }
-            });
-        });
 
-        // Open Edit Modal & Prefill Data
-        $(document).on('click', '.edit-btn', function() {
-            let id = $(this).data('id');
 
-            $.get("{{ route('customer.show', ':id') }}".replace(':id', id), function(customer) {
-                // Prefill modal fields
-                $('#edit_customer_id').val(customer.id);
-                $('#edit_first_name').val(customer.first_name);
-                $('#edit_last_name').val(customer.last_name);
-                $('#edit_email').val(customer.email);
-                $('#edit_phone').val(customer.phone);
-                $('#edit_status').val(customer.status);
-
-                // Set form action URL
-                $('#editCustomerForm').attr('action', "{{ route('customer.update', ':id') }}".replace(
-                    ':id', id));
-
-                // Show modal
-                $('#editCustomerModal').modal('show');
-            });
-        });
-
-        // Submit Edit Form via AJAX
-        $('#editCustomerForm').on('submit', function(e) {
-            e.preventDefault();
-            let form = $(this);
-
-            $.ajax({
-                url: form.attr('action'),
-                type: 'POST',
-                data: form.serialize(),
-                success: function(res) {
-                    if (res.success) {
-                        $('#editCustomerModal').modal('hide');
-                        location.reload(); // later we can update row without reload
-                    } else {
-                        alert(res.message);
-                    }
-                },
-                error: function(xhr) {
-                    alert('Error: ' + xhr.responseText);
-                }
-            });
-        });
 
         let deleteId = null;
 
@@ -324,7 +328,6 @@
                 url: "{{ route('customer.destroy', ':id') }}".replace(':id', id),
                 type: 'POST',
                 data: {
-                    _token: '{{ csrf_token() }}',
                     _method: 'DELETE'
                 },
                 success: function(res) {

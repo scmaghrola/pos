@@ -33,7 +33,7 @@
                                             <h6>{{ $p->title }}</h6>
                                             <p class="text-success">${{ number_format($p->price, 2) }}</p>
                                         </div>
-                                        
+
                                     </div>
                                 </div>
                             @endforeach
@@ -52,6 +52,7 @@
                                 <th>Product</th>
                                 <th>Qty</th>
                                 <th>Price</th>
+                                <th>Price*qty</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -63,7 +64,7 @@
                         <strong>Total:</strong>
                         <span id="cartTotal">$0.00</span>
                     </div>
-                    <button class="btn btn-success w-100 mt-3">PAYMENT</button>
+                    <button class="btn btn-success w-100 mt-3" onclick="checkout()">PAYMENT</button>
                 </div>
             </div>
         </div>
@@ -78,16 +79,17 @@
         const productListEl = document.getElementById('productList');
         const cartItemsEl = document.getElementById('cartItems');
         const cartTotalEl = document.getElementById('cartTotal');
-        let cart = [];
+        let cart =[]
 
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
-            const cartItem = cart.find(item => item.id === productId);
+            
+            const cartItem = activeCart.find(item => item.id === productId);
 
             if (cartItem) {
                 cartItem.qty += 1;
             } else {
-                cart.push({
+                activeCart.push({
                     ...product,
                     qty: 1
                 });
@@ -96,6 +98,7 @@
         }
 
         function removeFromCart(productId) {
+            
             cart = cart.filter(item => item.id !== productId);
             updateCart();
         }
@@ -104,12 +107,13 @@
             cartItemsEl.innerHTML = '';
             let total = 0;
 
-            cart.forEach(item => {
+            activeCart.forEach(item => {
                 total += item.price * item.qty;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                 <td>${item.title}</td>
                 <td>${item.qty}</td>
+                <td>${item.price}</td>
                 <td>$${(item.price * item.qty).toFixed(2)}</td>
                 <td><button class="btn btn-danger btn-sm" onclick="removeFromCart(${item.id})"><i class="bi bi-trash"></i></button></td>
             `;
@@ -118,6 +122,35 @@
 
             cartTotalEl.innerText = `$${total.toFixed(2)}`;
         }
+
+        function checkout() {
+            const activeCart = cart[activeUser]
+            if (activeCart.length === 0) {
+                alert("Cart is empty!");
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('pos-page.store') }}",
+                method: "POST",
+                data: {
+                    customer_name: "Walk-in Customer",
+                    cart: activeCart,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(res) {
+                    if (res.success) {
+                        alert("Order placed successfully!");
+                        window.location.href = "{{ route('pos-page.list') }}";
+                    }
+                },
+                error: function(err) {
+                    console.error(err);
+                    alert("Something went wrong!");
+                }
+            });
+        }
+
 
         // Category filtering
         document.querySelectorAll('.category-btn').forEach(btn => {

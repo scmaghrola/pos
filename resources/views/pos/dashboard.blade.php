@@ -5,7 +5,7 @@
         <div class="col-md-3">
             <div class="card p-3 text-center">
                 <i class="bi bi-person fs-3 text-primary"></i>
-                <h6 class="mt-2">2 Customers</h6>
+                <h6 class="mt-2">{{ $customers }} Customers</h6>
             </div>
         </div>
         <div class="col-md-3">

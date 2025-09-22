@@ -92,15 +92,17 @@ class CustomersController extends Controller
 
         $customer->update($request->only(['first_name', 'last_name', 'email', 'phone']));
 
-
-        return response()->json(['success' => true, 'customer' => $customer]);
-        // return redirect()->route('customer.list')->with('success', 'Customer updated successfully!');
+        return response()->json([
+            'success' => 'Customer updated successfully!',
+            'customer' => $customer,
+            'message' => 'Customer updated successfully!'
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request,string $id)
+    public function destroy(Request $request, string $id)
     {
         $customer = Customer::findOrFail($id);
         $customer->delete();

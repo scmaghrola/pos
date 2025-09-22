@@ -76,9 +76,8 @@ class CategoriesController extends Controller
                 'categories' => $categories
             ]);
         }
-        return $categories;
-
-        // return view('pos.edit_category', compact('category', 'categories'));
+    
+        return view('pos.edit_category', compact('category', 'categories'));
     }
 
     public function show(Category $category)

@@ -102,7 +102,8 @@
 
             <!-- Orders -->
             <li>
-                <a href="#" class="nav-link">
+                <a href="{{ route('orders.list') }}"
+                    class="nav-link  {{ Request::routeIs('orders.list') ? 'active' : '' }}">
                     <i class="bi bi-calendar-event me-2"></i>Orders
                 </a>
             </li>
