@@ -84,12 +84,12 @@
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
             
-            const cartItem = activeCart.find(item => item.id === productId);
+            const cartItem = cart.find(item => item.id === productId);
 
             if (cartItem) {
                 cartItem.qty += 1;
             } else {
-                activeCart.push({
+                cart.push({
                     ...product,
                     qty: 1
                 });
@@ -107,7 +107,7 @@
             cartItemsEl.innerHTML = '';
             let total = 0;
 
-            activeCart.forEach(item => {
+            cart.forEach(item => {
                 total += item.price * item.qty;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -124,8 +124,8 @@
         }
 
         function checkout() {
-            const activeCart = cart[activeUser]
-            if (activeCart.length === 0) {
+            const cart = cart[activeUser]
+            if (cart.length === 0) {
                 alert("Cart is empty!");
                 return;
             }
@@ -135,7 +135,7 @@
                 method: "POST",
                 data: {
                     customer_name: "Walk-in Customer",
-                    cart: activeCart,
+                    cart: cart,
                     _token: "{{ csrf_token() }}"
                 },
                 success: function(res) {
