@@ -21,6 +21,14 @@ use App\Http\Controllers\DashboardController;
 
 Route::prefix('admin')->group(function () {
 
+
+
+    Route::prefix('pos')->name('pos.')->group(function () {
+        Route::resource('products', ProductsController::class);
+        Route::post('products/upload-image', [ProductsController::class, 'uploadImage'])->name('products.upload-image');
+    });
+
+
     Route ::get('/dashboard',[DashboardController::class,'index'])->name('pos.dashboard');
 
 

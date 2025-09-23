@@ -10,21 +10,20 @@
                 </a>
             </div>
             <div class="card-body">
-                <form id="productForm" action="{{ route('pos.products.store') }}" method="POST"
-                    enctype="multipart/form-data">
+
+                <div id="message"></div>
+
+                <form id="productForm" method="POST">
                     @csrf
 
-
                     <div class="mb-3">
-                        <label for="title" class="form-label fw-semibold">Title <span
-                                class="text-danger">*</span></label>
-                        <input type="text" name="title" id="title" class="form-control" required>
+                        <label class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control" required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="category" class="form-label fw-semibold">Category <span
-                                class="text-danger">*</span></label>
-                        <select name="category_id" id="category" class="form-control" required>
+                        <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                        <select name="category_id" class="form-control" required>
                             <option value="">-- Select Category --</option>
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
@@ -32,41 +31,15 @@
                         </select>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="price" class="form-label fw-semibold">Price <span
-                                    class="text-danger">*</span></label>
-                            <input type="number" name="price" id="price" step="0.01" class="form-control"
-                                required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="compare_price" class="form-label fw-semibold">Compare Price</label>
-                            <input type="number" name="compare_price" id="compare_price" step="0.01"
-                                class="form-control">
-                        </div>
-                    </div>
-
-                    {{-- <div class="mb-3">
-                        <label for="image" class="form-label fw-semibold">Product Image</label>
-                        <input type="file" name="image" id="image" class="form-control" accept="image/*">
-                    </div> --}}
-
-                    <!-- Dropzone Form -->
                     <div class="mb-3">
-                        <label for="myDropzone" class="form-label fw-semibold">Product Image</label>
-                        <div class="dropzone" id="myDropzone"></div>
-
+                        <label class="form-label fw-semibold">Price <span class="text-danger">*</span></label>
+                        <input type="number" name="price" step="0.01" class="form-control" required>
                     </div>
 
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="sku" class="form-label fw-semibold">SKU</label>
-                            <input type="text" name="sku" id="sku" class="form-control">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="weight" class="form-label fw-semibold">Weight</label>
-                            <input type="number" name="weight" id="weight" step="0.01" class="form-control">
-                        </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Product Image</label>
+                        <div class="dropzone" id="myDropzone"></div>
+                        <input type="hidden" name="image" id="productImage">
                     </div>
 
                     <div class="d-flex justify-content-end">
@@ -79,34 +52,40 @@
         </div>
     </div>
 @endsection
-@section('scripts')
-    <script>
-        Dropzone.autoDiscover = false; // prevent auto init
 
-        var myDropzone = new Dropzone("#myDropzone", {
-            url: "{{ route('pos.products.store') }}",
-            paramName: "image", // name of the input
-            maxFilesize: 5, // MB
+@push('scripts')
+    <script>
+        Dropzone.autoDiscover = false;
+
+        let myDropzone = new Dropzone("#myDropzone", {
+            url: "{{ route('pos.products.upload-image') }}", // updated route
+            paramName: "image",
+            maxFiles: 1,
+            maxFilesize: 5,
             acceptedFiles: "image/*",
-            addRemoveLinks: true
+            addRemoveLinks: true,
+            dictDefaultMessage: "Drag & drop an image or click here",
+            headers: { // <-- add CSRF token here
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            success: function(file, response) {
+                $('#productImage').val(response.filename); // store uploaded filename
+            },
+            removedfile: function(file) {
+                $('#productImage').val(''); // clear hidden input
+                file.previewElement.remove();
+            }
         });
-    </script>
 
-    </script>
-    <script>
         $(document).ready(function() {
-
             $('#productForm').on('submit', function(e) {
                 e.preventDefault();
-
-                var formData = new FormData(this);
+                var formData = $(this).serialize();
 
                 $.ajax({
-                    url: $(this).attr('action'),
+                    url: "{{ route('pos.products.store') }}", // updated route
                     type: "POST",
                     data: formData,
-                    processData: false,
-                    contentType: false,
                     beforeSend: function() {
                         $('#message').html('<div class="alert alert-info">Saving...</div>');
                     },
@@ -114,8 +93,9 @@
                         if (response.success) {
                             $('#message').html('<div class="alert alert-success">' + response
                                 .message + '</div>');
-                            $('#productForm')[0].reset();
-                            window.location.href = "{{ route('pos.products.index') }}";
+                            setTimeout(() => {
+                                // window.location.href ="{{ route('pos.products.index') }}";
+                            }, 1000);
                         }
                     },
                     error: function(xhr) {
@@ -125,18 +105,16 @@
                             $.each(errors, function(key, value) {
                                 html += '<li>' + value[0] + '</li>';
                             });
-                            html += '</ul> </div>';
+                            html += '</ul></div>';
                             $('#message').html(html);
                         } else {
                             $('#message').html(
                                 '<div class="alert alert-danger">Something went wrong!</div>'
-                            );
+                                );
                         }
                     }
                 });
-
             });
-
         });
     </script>
-@endsection
+@endpush

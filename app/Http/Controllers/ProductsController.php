@@ -21,7 +21,7 @@ class ProductsController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function createOld()
     {
         $categories = Category::whereNull('parent_id')->get();
 
@@ -44,7 +44,7 @@ class ProductsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function storeOld(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
@@ -159,5 +159,71 @@ class ProductsController extends Controller
             ]);
         }
         return redirect()->route('pos.products.index')->with('success', 'Product deleted successfully!');
+    }
+
+
+
+    // Display all products
+    public function indexNEw()
+    {
+        $products = Product::all();
+        return view('pos.list_product', compact('products'));
+    }
+
+    // Show create form
+    public function create()
+    {
+        $categories = \App\Models\Category::all();
+        return view('pos.add_product', compact('categories'));
+    }
+
+    // Store product with image
+    public function store(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'price' => 'required|numeric',
+            'image' => 'nullable|string', // filename from Dropzone
+        ]);
+
+        $product = new Product();
+        $product->title = $request->title;
+        $product->category_id = $request->category_id;
+        $product->price = $request->price;
+        $product->compare_price = $request->compare_price;
+        $product->sku = $request->sku;
+        $product->weight = $request->weight;
+        $product->image = $request->image; // Dropzone uploaded filename
+        $product->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Product added successfully!'
+        ]);
+    }
+
+    // Dropzone image upload
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|max:5120', // 5MB
+        ]);
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->storeAs('public/products', $filename);
+
+            return response()->json([
+                'success' => true,
+                'filename' => $filename
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'No image uploaded'
+        ], 400);
     }
 }

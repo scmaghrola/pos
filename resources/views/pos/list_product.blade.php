@@ -51,8 +51,10 @@
                                     <td>{{ $product->weight ?? '-' }}</td>
                                     <td>
                                         @if ($product->image)
-                                            <img src="{{ asset('storage/' . $product->image) }}"
-                                                alt="{{ $product->title }}" class="img-thumbnail" width="50">
+                                            <img src="{{ asset('storage/products/' . $product->image) }}" alt="{{ $product->title }}" width="100">
+
+                                            {{-- <img src="@{{ asset('storage/' . $product->image) }}"
+                                                alt="@{{ $product->title }}" class="img-thumbnail" width="50"> --}}
                                         @else
                                             <span class="text-muted">No Image</span>
                                         @endif
