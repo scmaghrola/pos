@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Customer;
 use Illuminate\Support\Str;
 
 class PosController extends Controller
@@ -16,17 +17,14 @@ class PosController extends Controller
     public function index()
     {
         $products = Product::all();
-        // return $products;
-        return view('pos.pos', compact('products'));
+        $customers=Customer::all();
+        return view('pos.pos', compact('products'),compact('customers'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        //
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.
@@ -69,7 +67,6 @@ class PosController extends Controller
      */
     public function show(string $id)
     {
-        //
     }
 
     /**
