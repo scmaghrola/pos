@@ -66,7 +66,7 @@
                 </button>
 
                 <!-- Selected customer preview -->
-                <div class="alert alert-info" id="selectedCustomerBox">
+                <div class="alert alert-light" id="selectedCustomerBox">
                     <strong>Customer:</strong> <span id="selectedCustomerName"></span>
                 </div>
 
@@ -98,8 +98,6 @@
                     </div>
                 </div>
                 <!-- Customer Modal -->
-
-
 
                 <div class="cart-summary">
                     <h5>Cart</h5>
@@ -274,7 +272,7 @@
 
 
     <script>
-        // ======================== COOKIE HELPERS ========================
+        // ======================== COOKIE ========================
         function setCookie(name, value, days = 1) {
             const d = new Date();
             d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
@@ -292,6 +290,7 @@
                     return c.substring(cname.length, c.length);
                 }
             }
+
             return "";
         }
 
