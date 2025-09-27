@@ -1,4 +1,4 @@
-@extends('pos.layout.admin')
+@extends('pos.layout.layout')
 
 @section('content')
     <div class="container mt-4">
@@ -65,7 +65,7 @@
             acceptedFiles: "image/*",
             addRemoveLinks: true,
             dictDefaultMessage: "Drag & drop an image or click here",
-            headers: { // <-- add CSRF token here
+            headers: { 
                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
             },
             success: function(file, response) {
@@ -93,6 +93,7 @@
                         if (response.success) {
                             $('#message').html('<div class="alert alert-success">' + response
                                 .message + '</div>');
+                                $('#productForm')[0].reset();
                             setTimeout(() => {
                                 // window.location.href ="{{ route('pos.products.index') }}";
                             }, 1000);

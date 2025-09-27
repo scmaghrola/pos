@@ -1,4 +1,4 @@
-@extends('pos.layout.admin')
+@extends('pos.layout.layout')
 
 @section('content')
     <div class="container mt-5">
@@ -216,7 +216,7 @@
                 let formData = new FormData(this);
 
                 $.ajax({
-                    url: form.attr('action'),
+                    url: '{{ route('categories.store') }}',
                     type: 'POST',
                     data: formData,
                     processData: false,

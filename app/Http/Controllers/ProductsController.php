@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
-use App\Models\Customer;
 
 class ProductsController extends Controller
 {
@@ -173,7 +172,7 @@ class ProductsController extends Controller
     // Show create form
     public function create()
     {
-        $categories = \App\Models\Category::all();
+        $categories =Category::all();
         return view('pos.add_product', compact('categories'));
     }
 

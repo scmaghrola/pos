@@ -1,4 +1,4 @@
-@extends('pos.layout.admin')
+@extends('pos.layout.layout')
 @section('content')
     <div class="container mt-4">
         <div class="card shadow-sm rounded-3">
@@ -61,7 +61,6 @@
 @endsection
 
 @section('scripts')
-    
     <script>
         $(document).ready(function() {
 

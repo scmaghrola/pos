@@ -16,11 +16,15 @@ class PosController extends Controller
      */
     public function index()
     {
-        $products = Product::all();
-        $customers=Customer::all();
-        return view('pos.pos', compact('products'),compact('customers'));
+        $customers = Customer::all();
+        return view('pos.pos', compact('customers'));
     }
 
+    public function getProducts()
+    {
+        $products = Product::all(); // Or apply any filters/queries as needed
+        return response()->json($products);
+    }
     /**
      * Show the form for creating a new resource.
      */
@@ -29,7 +33,7 @@ class PosController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -66,9 +70,7 @@ class PosController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.

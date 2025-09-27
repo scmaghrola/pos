@@ -1,4 +1,4 @@
-@extends('pos.layout.admin')
+@extends('pos.layout.layout')
 
 @section('content')
     <div class="flex-grow-1 content">

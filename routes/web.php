@@ -32,6 +32,7 @@ Route::prefix('admin')->group(function () {
     Route ::get('/dashboard',[DashboardController::class,'index'])->name('pos.dashboard');
 
 
+    Route::get('/pos/products', [PosController::class, 'getProducts'])->name('pos.products');
     Route::patch('products/{product}/toggle-status', [ProductsController::class, 'toggleStatus'])
         ->name('pos.products.toggleStatus');
     Route::resource('products', ProductsController::class)->names([

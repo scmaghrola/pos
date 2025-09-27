@@ -1,4 +1,4 @@
-@extends('pos.layout.admin')
+@extends('pos.layout.layout')
 
 @push('styles')
     <style>
@@ -15,7 +15,7 @@
 @endpush
 
 @section('content')
-    <div class="container mt-3">
+    <div class="container-fluid mt-3 me-4">
         <div class="row">
             <!-- Products Section -->
             <div class="col-lg-8 mb-3">
@@ -31,27 +31,7 @@
                             <button class="btn btn-outline-secondary category-btn" data-category="10">Appliances</button>
                         </div>
                         <div class="row" id="productList">
-                            {{-- Initial display from Blade --}}
-                            @foreach ($products as $p)
-                                <div class="col-md-2 mb-3 product-item" data-category="{{ $p->category_id }}">
-                                    <div class="card product-card h-100 d-flex flex-column text-center"
-                                        onclick="addToCart({{ $p->id }})" style="min-height: 260px;">
-
-                                        @if ($p->image)
-                                            <img src="{{ asset('storage/' . $p->image) }}" alt="{{ $p->title }}"
-                                                class="card-img-top img-fluid fixed-img">
-                                        @else
-                                            <span class="text-muted mt-3">No Image</span>
-                                        @endif
-
-                                        <div class="card-body d-flex flex-column justify-content-between">
-                                            <h6 class="card-title text-truncate">{{ $p->title }}</h6>
-                                            <p class="text-success mb-0">${{ number_format($p->price, 2) }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-
+                            <!-- Products will be loaded via AJAX -->
                         </div>
                     </div>
                 </div>
@@ -82,12 +62,16 @@
                             </div>
                             <div class="modal-body">
                                 <div class="list-group">
+                                    <button type="button" class="list-group-item list-group-item-action customer-select"
+                                        data-id="" data-name="Walk-in Customer">
+                                        Walk-in Customer
+                                    </button>
                                     @forelse ($customers as $customer)
                                         <button type="button"
                                             class="list-group-item list-group-item-action customer-select"
-                                            data-id="{{ $customer['id'] }}"
-                                            data-name="{{ $customer['first_name'] }} {{ $customer['last_name'] }}">
-                                            {{ $customer['first_name'] }} {{ $customer['last_name'] }}
+                                            data-id="{{ $customer->id }}"
+                                            data-name="{{ $customer->first_name }} {{ $customer->last_name }}">
+                                            {{ $customer->first_name }} {{ $customer->last_name }}
                                         </button>
                                     @empty
                                         <p class="text-muted">No customers found.</p>
@@ -119,7 +103,7 @@
                         <strong>Total:</strong>
                         <span id="cartTotal">$0.00</span>
                     </div>
-                    <button class="btn btn-success w-100 mt-3" onclick="checkout()">PAYMENT</button>
+                    <button class="btn btn-success w-100 mt-3" onclick="checkout()">Place Order</button>
                 </div>
 
             </div>
@@ -130,147 +114,6 @@
 @endsection
 
 @push('scripts')
-    {{-- <script>
-        let selectedCustomer = {
-            id: null,
-            name: "Walk-in Customer"
-        };
-
-        // Handle customer selection from modal
-        document.querySelectorAll('.customer-select').forEach(btn => {
-            btn.addEventListener('click', function() {
-                selectedCustomer.id = this.dataset.id;
-                selectedCustomer.name = this.dataset.name;
-
-                document.getElementById('selectedCustomerName').innerText = selectedCustomer.name;
-
-                // Close modal after selection
-                var modal = bootstrap.Modal.getInstance(document.getElementById('customerModal'));
-                modal.hide();
-            });
-        });
-
-        // Update checkout function to send selected customer
-        function checkout() {
-            const activeCart = cart[activeUser];
-            if (activeCart.length === 0) {
-                alert("Cart is empty!");
-                return;
-            }
-
-            $.ajax({
-                url: "{{ route('pos-page.store') }}",
-                method: "POST",
-                data: {
-                    customer_id: selectedCustomer.id,
-                    customer_name: selectedCustomer.name,
-                    cart: activeCart,
-                    _token: "{{ csrf_token() }}"
-                },
-                success: function(res) {
-                    if (res.success) {
-                        alert("Order placed successfully!");
-                        window.location.href = "{{ route('pos-page.list') }}";
-                    }
-                },
-                error: function(err) {
-                    console.error(err);
-                    alert("Something went wrong!");
-                }
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const radios = document.getElementsById('radiobtn');
-
-            radios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    console.log('Selected value:', this.value);
-                });
-            });
-        });
-
-        // Pass Laravel data into JS
-        const products = @json($products);
-
-        const productListEl = document.getElementById('productList');
-        const cartItemsEl = document.getElementById('cartItems');
-        const cartTotalEl = document.getElementById('cartTotal');
-        var activeUser = "user1";
-        let cart = {
-            "user1": []
-        };
-
-        function addToCart(productId) {
-            const product = products.find(p => p.id === productId);
-            const activeCart = cart[activeUser]
-            const cartItem = activeCart.find(item => item.id === productId);
-
-            if (cartItem) {
-                cartItem.qty += 1;
-            } else {
-                activeCart.push({
-                    ...product,
-                    qty: 1
-                });
-            }
-            updateCart();
-        }
-
-        function removeFromCart(productId) {
-            const activeCart = cart[activeUser];
-            cart[activeUser] = activeCart.filter(item => item.id !== productId);
-            updateCart();
-        }
-
-
-        function updateCart() {
-            cartItemsEl.innerHTML = '';
-            let total = 0;
-
-            const activeCart = cart[activeUser]
-            activeCart.forEach(item => {
-                total += item.price * item.qty;
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                                            <td>${item.title}</td>
-                                            <td>${item.qty}</td>
-                                            <td>${item.price}</td>
-                                            <td>$${(item.price * item.qty).toFixed(2)}</td>
-                                            <td><button class="btn btn-danger btn-sm" onclick="removeFromCart(${item.id})"><i class="bi bi-trash"></i></button></td>
-                                        `;
-                cartItemsEl.appendChild(tr);
-            });
-
-            cartTotalEl.innerText = `$${total.toFixed(2)}`;
-        }
-
-
-        // Category filtering
-        document.querySelectorAll('.category-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const cat = btn.getAttribute('data-category');
-                document.querySelectorAll('.product-item').forEach(item => {
-                    if (cat === 'all' || item.getAttribute('data-category') == cat) {
-                        item.style.display = 'block';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            });
-        });
-
-        // Search products
-        document.getElementById('searchProduct').addEventListener('input', e => {
-            const search = e.target.value.toLowerCase();
-            document.querySelectorAll('.product-item').forEach(item => {
-                const title = item.querySelector('h6').innerText.toLowerCase();
-                item.style.display = title.includes(search) ? 'block' : 'none';
-            });
-        });
-    </script> --}}
-
-
     <script>
         // ======================== COOKIE ========================
         function setCookie(name, value, days = 1) {
@@ -301,6 +144,7 @@
         };
         let cart = {}; // per-customer carts
         let activeUser = null;
+        let products = [];
 
         // Load carts from cookie when page loads
         document.addEventListener("DOMContentLoaded", () => {
@@ -312,6 +156,20 @@
                     cart = {};
                 }
             }
+
+            // Set initial display and active user
+            document.getElementById('selectedCustomerName').innerText = selectedCustomer.name;
+            activeUser = selectedCustomer.id || 'walkin';
+            if (!cart[activeUser]) {
+                cart[activeUser] = [];
+            }
+            updateCart();
+
+            // Fetch products via AJAX
+            $.get("{{ route('pos.products') }}", function(data) {
+                products = data;
+                buildProductList(data);
+            });
         });
 
         // Save carts to cookie
@@ -319,13 +177,34 @@
             setCookie("pos_cart", JSON.stringify(cart), 1);
         }
 
+        // Build product list HTML
+        function buildProductList(products) {
+            let html = '';
+            products.forEach(p => {
+                html += `
+                    <div class="col-md-2 mb-3 product-item" data-category="${p.category_id}">
+                        <div class="card product-card h-100 d-flex flex-column text-center"
+                            onclick="addToCart(${p.id})" style="min-height: 260px;">
+                            ${p.image ? `<img src="/storage/products/${p.image}" alt="${p.title}" class="card-img-top img-fluid fixed-img">` : '<span class="text-muted mt-3">No Image</span>'}
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <h6 class="card-title text-truncate">${p.title}</h6>
+                                <p class="text-success mb-0">$${parseFloat(p.price).toFixed(2)}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('productList').innerHTML = html;
+        }
+
         // ======================== CUSTOMER SELECT ========================
         document.querySelectorAll('.customer-select').forEach(btn => {
             btn.addEventListener('click', function() {
-                selectedCustomer.id = this.dataset.id;
+                const id = this.dataset.id;
+                selectedCustomer.id = id ? parseInt(id) : null;
                 selectedCustomer.name = this.dataset.name;
 
-                activeUser = selectedCustomer.id;
+                activeUser = selectedCustomer.id || 'walkin';
 
                 if (!cart[activeUser]) {
                     cart[activeUser] = [];
@@ -341,21 +220,36 @@
         });
 
         // ======================== CART FUNCTIONS ========================
-        const products = @json($products);
 
         function addToCart(productId) {
             if (!activeUser) {
-                alert("Please select a customer first!");
+                var modal = new bootstrap.Modal(document.getElementById('customerModal'));
+                modal.show();
                 return;
             }
 
             const product = products.find(p => p.id === productId);
+            if (!product) {
+                console.error(`Product with ID ${productId} not found.`);
+                return;
+            }
+
             const activeCart = cart[activeUser];
             const cartItem = activeCart.find(item => item.id === productId);
 
             if (cartItem) {
+                // Check stock
+                if (product.sku && cartItem.qty >= product.sku) {
+                    alert("Cannot add more, out of stock!");
+                    return;
+                }
                 cartItem.qty += 1;
             } else {
+                // Check stock for new item
+                if (product.sku && product.sku < 1) {
+                    alert("Out of stock!");
+                    return;
+                }
                 activeCart.push({
                     ...product,
                     qty: 1
@@ -373,6 +267,42 @@
             saveCart();
         }
 
+        function incrementQty(productId) {
+            if (!activeUser) return;
+            const activeCart = cart[activeUser];
+            const cartItem = activeCart.find(item => item.id === productId);
+            if (cartItem) {
+                const product = products.find(p => p.id === productId);
+                if (!product) {
+                    console.error(`Product with ID ${productId} not found.`);
+                    return;
+                }
+                // Check stock
+                if (product.sku && cartItem.qty >= product.sku) {
+                    alert("Cannot add more, out of stock!");
+                    return;
+                }
+                cartItem.qty += 1;
+                updateCart();
+                saveCart();
+            }
+        }
+
+        function decrementQty(productId) {
+            if (!activeUser) return;
+            const activeCart = cart[activeUser];
+            const cartItem = activeCart.find(item => item.id === productId);
+            if (cartItem) {
+                if (cartItem.qty > 1) {
+                    cartItem.qty -= 1;
+                } else {
+                    removeFromCart(productId);
+                }
+                updateCart();
+                saveCart();
+            }
+        }
+
         function updateCart() {
             const cartItemsEl = document.getElementById('cartItems');
             const cartTotalEl = document.getElementById('cartTotal');
@@ -386,7 +316,11 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
             <td>${item.title}</td>
-            <td>${item.qty}</td>
+            <td>
+                <button class="btn btn-sm btn-secondary" onclick="decrementQty(${item.id})">-</button>
+                ${item.qty}
+                <button class="btn btn-sm btn-secondary" onclick="incrementQty(${item.id})">+</button>
+            </td>
             <td>${item.price}</td>
             <td>$${(item.price * item.qty).toFixed(2)}</td>
             <td>
