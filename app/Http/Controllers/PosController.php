@@ -19,16 +19,35 @@ class PosController extends Controller
         $customers = Customer::all();
         return view('pos.pos', compact('customers'));
     }
-
-    public function getProducts()
+    
+    public function getProducts(Request $request)
     {
-        $products = Product::all(); // Or apply any filters/queries as needed
+        $query = Product::query();
+
+        // Filter by category if provided
+        if ($request->filled('category') && $request->category !== 'all') {
+            $query->where('category_id', $request->category);
+        }
+
+        // Search by title if provided
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        // Only return necessary columns
+        $products = $query->select('id', 'title', 'price', 'image', 'category_id', 'sku')->get();
+
         return response()->json($products);
     }
+
+
     /**
      * Show the form for creating a new resource.
      */
-    public function create() {}
+    public function create()
+    {
+        //
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -44,16 +63,35 @@ class PosController extends Controller
             'cart.*.price' => 'required|numeric|min:0',
         ]);
 
+        $total = 0;
+
+        // Validate stock
+        foreach ($data['cart'] as $item) {
+            $product = Product::find($item['id']);
+
+            if ($product->sku < $item['qty']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "{$product->title} is out of stock (available: {$product->sku})"
+                ], 400);
+            }
+
+            $total += $item['price'] * $item['qty'];
+        }
+
         // Create Order
         $order = Order::create([
             'customer_name' => $data['customer_name'] ?? 'Walk-in',
             'order_number' => 'ORD-' . strtoupper(Str::random(6)),
-            'total' => collect($data['cart'])->sum(fn($item) => $item['price'] * $item['qty']),
+            'total' => $total,
             'status' => 'Pending',
         ]);
 
-        // Create Order Items
+        // Create items & reduce stock
         foreach ($data['cart'] as $item) {
+            $product = Product::find($item['id']);
+            $product->decrement('sku', $item['qty']); // reduce stock
+
             OrderItem::create([
                 'order_id' => $order->id,
                 'product_id' => $item['id'],
@@ -63,14 +101,17 @@ class PosController extends Controller
             ]);
         }
 
-
         return response()->json(['success' => true, 'order_id' => $order->id]);
     }
+
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id) {}
+    public function show(string $id)
+    {
+        //
+    }
 
     /**
      * Show the form for editing the specified resource.

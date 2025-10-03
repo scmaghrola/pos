@@ -41,7 +41,8 @@
             <div class="col-lg-4">
 
                 <!-- Trigger Button -->
-                <button class="btn btn-primary w-100 mb-3" data-bs-toggle="modal" data-bs-target="#customerModal">
+                <button class="btn btn-light border border-secondary w-100 mb-3" data-bs-toggle="modal"
+                    data-bs-target="#customerModal">
                     Select Customer
                 </button>
 
@@ -55,7 +56,7 @@
                     aria-hidden="true">
                     <div class="modal-dialog modal-dialog-scrollable">
                         <div class="modal-content">
-                            <div class="modal-header bg-primary text-white">
+                            <div class="modal-header bg-secondary text-white">
                                 <h5 class="modal-title" id="customerModalLabel">Select Customer</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
@@ -81,8 +82,8 @@
                         </div>
                     </div>
                 </div>
-                <!-- Customer Modal -->
 
+                <!-- Customer Modal -->
                 <div class="cart-summary">
                     <h5>Cart</h5>
                     <table class="table table-bordered cart-table">
@@ -181,19 +182,22 @@
         function buildProductList(products) {
             let html = '';
             products.forEach(p => {
+                let disabled = p.sku < 1 ? 'disabled' : '';
                 html += `
-                    <div class="col-md-2 mb-3 product-item" data-category="${p.category_id}">
-                        <div class="card product-card h-100 d-flex flex-column text-center"
-                            onclick="addToCart(${p.id})" style="min-height: 260px;">
-                            ${p.image ? `<img src="/storage/products/${p.image}" alt="${p.title}" class="card-img-top img-fluid fixed-img">` : '<span class="text-muted mt-3">No Image</span>'}
-                            <div class="card-body d-flex flex-column justify-content-between">
-                                <h6 class="card-title text-truncate">${p.title}</h6>
-                                <p class="text-success mb-0">$${parseFloat(p.price).toFixed(2)}</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
+        <div class="col-md-2 mb-3 product-item" data-category="${p.category_id}">
+            <div class="card product-card h-100 text-center ${disabled}">
+                ${p.image ? `<img src="/storage/products/${p.image}" alt="${p.title}" class="card-img-top img-fluid fixed-img">` : '<span class="text-muted mt-3">No Image</span>'}
+                <div class="card-body">
+                    <h6 class="card-title text-truncate">${p.title}</h6>
+                    <p class="text-success mb-0">$${parseFloat(p.price).toFixed(2)}</p>
+                    ${p.sku > 0 ? `<button class="btn btn-sm btn-success  mt-2" onclick="addToCart(${p.id})">Add</button>` 
+                                  : `<span class="badge bg-danger mt-2">Out of Stock</span>`}
+                </div>
+            </div>
+        </div>
+    `;
             });
+
             document.getElementById('productList').innerHTML = html;
         }
 
@@ -282,6 +286,7 @@
                     alert("Cannot add more, out of stock!");
                     return;
                 }
+
                 cartItem.qty += 1;
                 updateCart();
                 saveCart();
@@ -369,24 +374,41 @@
         }
 
         // ======================== CATEGORY & SEARCH ========================
+        function fetchProducts(params = {}) {
+            $.get("{{ route('pos.products') }}", params, function(data) {
+                products = data;
+                buildProductList(data);
+            });
+        }
+
+        // Category filter
+        function fetchProducts(params = {}) {
+            $.get("{{ route('pos.products') }}", params, function(data) {
+                products = data;
+                buildProductList(data);
+            });
+        }
+
+        // Category filter
         document.querySelectorAll('.category-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const cat = btn.getAttribute('data-category');
-                document.querySelectorAll('.product-item').forEach(item => {
-                    if (cat === 'all' || item.getAttribute('data-category') == cat) {
-                        item.style.display = 'block';
-                    } else {
-                        item.style.display = 'none';
-                    }
+                fetchProducts({
+                    category: cat,
+                    search: document.getElementById('searchProduct').value
                 });
             });
         });
 
+        // Search filter
         document.getElementById('searchProduct').addEventListener('input', e => {
-            const search = e.target.value.toLowerCase();
-            document.querySelectorAll('.product-item').forEach(item => {
-                const title = item.querySelector('h6').innerText.toLowerCase();
-                item.style.display = title.includes(search) ? 'block' : 'none';
+            const search = e.target.value;
+            const activeCategory = document.querySelector('.category-btn.active')?.getAttribute('data-category') ||
+                'all';
+
+            fetchProducts({
+                category: activeCategory,
+                search: search
             });
         });
     </script>

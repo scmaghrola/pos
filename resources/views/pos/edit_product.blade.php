@@ -54,7 +54,7 @@
                         <label for="image" class="form-label fw-semibold">Product Image</label>
                         @if ($product->image)
                             <div class="mb-2">
-                                <img src="{{ asset('storage/' . $product->image) }}" alt="Product Image"
+                                <img src="{{ asset('storage/products/' . $product->image) }}" alt="Product Image"
                                     class="img-thumbnail" width="120">
                             </div>
                         @endif

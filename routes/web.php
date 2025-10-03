@@ -8,6 +8,7 @@ use App\Http\Controllers\PosController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\DashboardController;
 
+use Illuminate\Support\Facades\Http;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -18,7 +19,27 @@ use App\Http\Controllers\DashboardController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
+// Route::get('/moneyformat', function () {
+//     echo "<pre>";
+//     print_r(my_money_format(5000000, 'IN'));
+//     echo "</pre>";
+//     exit;
+// });
 
+Route::get('/paypal-token', function () {
+    $clientId = env('PAY_PAL_CLIENT_ID');
+    $clientSecret = env('PAY_PAL_CLIENT_SECRET');
+    $baseUrl = env('PAY_PAL_BASE_URL');
+
+    // Make request using Laravel HTTP client
+    $response = Http::withBasicAuth($clientId, $clientSecret)
+        ->asForm()
+        ->post("$baseUrl/v1/oauth2/token", [
+            'grant_type' => 'client_credentials',
+        ]);
+
+    return $response->json();
+});
 Route::prefix('admin')->group(function () {
 
 
