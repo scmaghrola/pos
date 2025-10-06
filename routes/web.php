@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\CategoriesController;
@@ -8,38 +9,25 @@ use App\Http\Controllers\PosController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserPermissionController;
-use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\Auth\LoginController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
 */
-// Route::get('/moneyformat', function () {
-//     echo "<pre>";
-//     print_r(my_money_format(5000000, 'IN'));
-//     echo "</pre>";
-//     exit;
-// });
 
-// use Spatie\Permission\Models\Role;
-// use App\Models\User;
-// Route::get('/make_super_admin', function () {
-//     $role = Role::firstOrCreate(['name' => 'Super Admin']);
-//     $user = User::find(2);
-//     $user->assignRole('Super Admin');
-// });
+// ======================= Authentication Routes ========================
+Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('login', [LoginController::class, 'login']);
+Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
+// ======================= PayPal Token Route ===========================
 Route::get('/paypal-token', function () {
     $clientId = env('PAY_PAL_CLIENT_ID');
     $clientSecret = env('PAY_PAL_CLIENT_SECRET');
     $baseUrl = env('PAY_PAL_BASE_URL');
 
-    // Make request using Laravel HTTP client
     $response = Http::withBasicAuth($clientId, $clientSecret)
         ->asForm()
         ->post("$baseUrl/v1/oauth2/token", [
@@ -48,26 +36,41 @@ Route::get('/paypal-token', function () {
 
     return $response->json();
 });
-Route::prefix('admin')->group(function () {
 
-    
+// ======================= Admin Routes ================================
+Route::prefix('admin')->middleware(['auth'])->group(function () {
 
-    Route::middleware(['role:Super Admin'])->group(function () {
-        Route::get('/users/{id}/permissions', [UserPermissionController::class, 'edit'])->name('users.permissions.edit');
-        Route::post('/users/{id}/permissions', [UserPermissionController::class, 'update'])->name('users.permissions.update');
+    // ---------------- Test Auth -----------------
+    Route::get('/test-auth', function () {
+        return auth()->check() ? 'Logged in' : 'Not logged in';
     });
 
+    // ---------------- Super Admin Routes -----------------
+    Route::middleware(['role:Super Admin'])->group(function () {
+        Route::get('/users/{id}/permissions', [UserPermissionController::class, 'edit'])
+            ->name('users.permissions.edit');
+        Route::post('/users/{id}/permissions', [UserPermissionController::class, 'update'])
+            ->name('users.permissions.update');
+    });
 
+    // ---------------- POS Routes -----------------
     Route::prefix('pos')->name('pos.')->group(function () {
         Route::resource('products', ProductsController::class);
-        Route::post('products/upload-image', [ProductsController::class, 'uploadImage'])->name('products.upload-image');
+        Route::post('products/upload-image', [ProductsController::class, 'uploadImage'])
+            ->name('products.upload-image');
     });
 
-    Route ::get('/dashboard',[DashboardController::class,'index'])->name('pos.dashboard');
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('pos.dashboard');
 
+    // POS AJAX Products
     Route::get('/pos/products', [PosController::class, 'getProducts'])->name('pos.products');
+
+    // Products toggle status
     Route::patch('products/{product}/toggle-status', [ProductsController::class, 'toggleStatus'])
         ->name('pos.products.toggleStatus');
+
+    // Products resource
     Route::resource('products', ProductsController::class)->names([
         'index' => 'pos.products.index',
         'create' => 'pos.products.create',
@@ -78,8 +81,11 @@ Route::prefix('admin')->group(function () {
         'destroy' => 'pos.products.destroy',
     ]);
 
+    // Categories toggle status
     Route::patch('admin/categories/{category}/toggle-status', [CategoriesController::class, 'toggleStatus'])
         ->name('category.toggleStatus');
+
+    // Categories resource
     Route::resource('admin/categories', CategoriesController::class)->names([
         'index' => 'category.list',
         'create' => 'category.add',
@@ -90,7 +96,11 @@ Route::prefix('admin')->group(function () {
         'destroy' => 'categories.destroy',
     ]);
 
-    Route::post('/customers/{id}/toggle-status', [CustomersController::class, 'toggleStatus'])->name('customer.toggle');
+    // Customers toggle status
+    Route::post('/customers/{id}/toggle-status', [CustomersController::class, 'toggleStatus'])
+        ->name('customer.toggle');
+
+    // Customers resource
     Route::resource('customers', CustomersController::class)->names([
         'index' => 'customer.list',
         'create' => 'customer.add',
@@ -101,6 +111,7 @@ Route::prefix('admin')->group(function () {
         'destroy' => 'customer.destroy',
     ]);
 
+    // POS Page resource
     Route::resource('pos-page', PosController::class)->names([
         'index' => 'pos-page.list',
         'create' => 'pos-page.add',
@@ -111,9 +122,8 @@ Route::prefix('admin')->group(function () {
         'destroy' => 'pos-page.destroy',
     ]);
 
+    // Orders
     Route::get('orders', [OrderController::class, 'index'])->name('orders.list');
-
     Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.view');
-
     Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.delete');
 });
