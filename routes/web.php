@@ -7,7 +7,7 @@ use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\DashboardController;
-
+use App\Http\Controllers\UserPermissionController;
 use Illuminate\Support\Facades\Http;
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +26,14 @@ use Illuminate\Support\Facades\Http;
 //     exit;
 // });
 
+// use Spatie\Permission\Models\Role;
+// use App\Models\User;
+// Route::get('/make_super_admin', function () {
+//     $role = Role::firstOrCreate(['name' => 'Super Admin']);
+//     $user = User::find(2);
+//     $user->assignRole('Super Admin');
+// });
+
 Route::get('/paypal-token', function () {
     $clientId = env('PAY_PAL_CLIENT_ID');
     $clientSecret = env('PAY_PAL_CLIENT_SECRET');
@@ -42,6 +50,12 @@ Route::get('/paypal-token', function () {
 });
 Route::prefix('admin')->group(function () {
 
+    
+
+    Route::middleware(['role:Super Admin'])->group(function () {
+        Route::get('/users/{id}/permissions', [UserPermissionController::class, 'edit'])->name('users.permissions.edit');
+        Route::post('/users/{id}/permissions', [UserPermissionController::class, 'update'])->name('users.permissions.update');
+    });
 
 
     Route::prefix('pos')->name('pos.')->group(function () {
@@ -49,9 +63,7 @@ Route::prefix('admin')->group(function () {
         Route::post('products/upload-image', [ProductsController::class, 'uploadImage'])->name('products.upload-image');
     });
 
-
     Route ::get('/dashboard',[DashboardController::class,'index'])->name('pos.dashboard');
-
 
     Route::get('/pos/products', [PosController::class, 'getProducts'])->name('pos.products');
     Route::patch('products/{product}/toggle-status', [ProductsController::class, 'toggleStatus'])
@@ -66,8 +78,6 @@ Route::prefix('admin')->group(function () {
         'destroy' => 'pos.products.destroy',
     ]);
 
-
-
     Route::patch('admin/categories/{category}/toggle-status', [CategoriesController::class, 'toggleStatus'])
         ->name('category.toggleStatus');
     Route::resource('admin/categories', CategoriesController::class)->names([
@@ -79,7 +89,6 @@ Route::prefix('admin')->group(function () {
         'update' => 'categories.update',
         'destroy' => 'categories.destroy',
     ]);
-
 
     Route::post('/customers/{id}/toggle-status', [CustomersController::class, 'toggleStatus'])->name('customer.toggle');
     Route::resource('customers', CustomersController::class)->names([
