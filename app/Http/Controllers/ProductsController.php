@@ -11,9 +11,20 @@ class ProductsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+
+    public function index(Request $request)
     {
-        $products = Product::paginate(3); // fetch all products from DB
+        $products = Product::with('category')->paginate(3);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'products' => $products->items(),
+                'pagination' => $products->links('pagination::bootstrap-5')->toHtml(),
+                'current_page' => $products->currentPage(),
+                'per_page' => $products->perPage(),
+            ]);
+        }
+
         return view('pos.list_product', compact('products'));
     }
 
@@ -83,10 +94,7 @@ class ProductsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-      
-    }
+    public function show(string $id) {}
 
     /**
      * Show the form for editing the specified resource.
@@ -172,7 +180,7 @@ class ProductsController extends Controller
     // Show create form
     public function create()
     {
-        $categories =Category::all();
+        $categories = Category::all();
         return view('pos.add_product', compact('categories'));
     }
 

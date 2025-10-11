@@ -26,4 +26,6 @@ class UserPermissionController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Permissions updated successfully!']);
     }
+
+    
 }

@@ -1,15 +1,16 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PosController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\CustomersController;
-use App\Http\Controllers\CategoriesController;
-use App\Http\Controllers\PosController;
-use App\Http\Controllers\OrderController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\UserPermissionController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\UserPermissionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,6 +41,10 @@ Route::get('/paypal-token', function () {
 // ======================= Admin Routes ================================
 Route::prefix('admin')->middleware(['auth'])->group(function () {
 
+    // ---------------- User Profile Routes -----------------
+    Route::get('/profile', [UserController::class, 'profile'])->name('user.profile');
+    Route::post('/profile/update', [UserController::class, 'updateProfile'])->name('user.profile.update');
+
     // ---------------- Test Auth -----------------
     Route::get('/test-auth', function () {
         return auth()->check() ? 'Logged in' : 'Not logged in';
@@ -52,6 +57,25 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::post('/users/{id}/permissions', [UserPermissionController::class, 'update'])
             ->name('users.permissions.update');
     });
+
+    Route::middleware(['role:Super Admin'])->group(function () {
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+        Route::get('/users/list', [UserController::class, 'ajaxList'])->name('users.ajaxList');
+    });
+
+
+
+    // Users resource
+    Route::resource('users', UserController::class)->names([
+        'index' => 'users.index',
+        'create' => 'users.create',
+        'store' => 'users.store',
+        'show' => 'users.show',
+        'edit' => 'users.edit',
+        'update' => 'users.update',
+        'destroy' => 'users.destroy',
+    ]);
+
 
     // ---------------- POS Routes -----------------
     Route::prefix('pos')->name('pos.')->group(function () {
@@ -79,7 +103,16 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         'edit' => 'pos.products.edit',
         'update' => 'pos.products.update',
         'destroy' => 'pos.products.destroy',
-    ]);
+    ])
+        ->middleware([
+            'index' => 'permission:products.view|products.edit|products.delete',
+            'create' => 'permission:products.create',
+            'store' => 'permission:products.create',
+            'show' => 'permission:products.view',
+            'edit' => 'permission:products.edit',
+            'update' => 'permission:products.edit',
+            'destroy' => 'permission:products.delete',
+        ]);
 
     // Categories toggle status
     Route::patch('admin/categories/{category}/toggle-status', [CategoriesController::class, 'toggleStatus'])

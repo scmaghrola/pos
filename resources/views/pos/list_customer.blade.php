@@ -48,11 +48,14 @@
                                         </button>
 
                                         <!-- Delete -->
+                                        @can('customers.delete')
+                                            
                                         <button type="button" class="btn btn-danger btn-sm delete-btn"
-                                            data-id="{{ $customer->id }}">
+                                        data-id="{{ $customer->id }}">
                                             <i class="bi bi-trash"></i>
                                         </button>
-
+                                        @endcan
+                                    
                                         <!-- Toggle Status -->
                                         <button type="button"
                                             class="btn btn-sm toggle-status-btn {{ $customer->status ? 'btn-success' : 'btn-secondary' }}"
