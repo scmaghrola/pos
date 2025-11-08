@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Category;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PosController;
@@ -38,6 +39,9 @@ Route::get('/paypal-token', function () {
     return $response->json();
 });
 
+Route::get('/', function () {
+    return redirect()->route('login');
+});
 // ======================= Admin Routes ================================
 Route::prefix('admin')->middleware(['auth'])->group(function () {
 
@@ -63,8 +67,6 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         Route::get('/users/list', [UserController::class, 'ajaxList'])->name('users.ajaxList');
     });
 
-
-
     // Users resource
     Route::resource('users', UserController::class)->names([
         'index' => 'users.index',
@@ -75,7 +77,6 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         'update' => 'users.update',
         'destroy' => 'users.destroy',
     ]);
-
 
     // ---------------- POS Routes -----------------
     Route::prefix('pos')->name('pos.')->group(function () {
@@ -115,7 +116,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         ]);
 
     // Categories toggle status
-    Route::patch('admin/categories/{category}/toggle-status', [CategoriesController::class, 'toggleStatus'])
+    Route::patch('categories/{category}/toggle-status', [CategoriesController::class, 'toggleStatus'])
         ->name('category.toggleStatus');
 
     // Categories resource
@@ -128,6 +129,12 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
         'update' => 'categories.update',
         'destroy' => 'categories.destroy',
     ]);
+    // categories.all
+    Route::get('categories/all', [CategoriesController::class, 'getAll'])->name('categories.all');
+    // categories.import
+    Route::post('categories/import', [CategoriesController::class, 'import'])->name('categories.import');
+    // categories.export
+    Route::get('categories/export', [CategoriesController::class, 'export'])->name('categories.export');
 
     // Customers toggle status
     Route::post('/customers/{id}/toggle-status', [CustomersController::class, 'toggleStatus'])
@@ -160,3 +167,51 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.view');
     Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.delete');
 });
+
+// Route::get('/seed-categories', function () {
+//     $categories = [
+//         ["name" => "XYZ", "parent_category" => null, 'image' => 'xyz.png'],
+//         ["name" => "ABC", "parent_category" => null, 'image' => 'abc.png'],
+//         ["name" => "PQR", "parent_category" => null, 'image' => 'pqr.png'],
+//         ["name" => "Sub XYZ 101", "parent_category" => "p1", 'image' => 'sub_xyz101.png'],
+//         ["name" => "Sub XYZ 102", "parent_category" => "p1", 'image' => 'sub_xyz102.png'],
+//         ["name" => "Sub XYZ 1", "parent_category" => "XYZ", 'image' => 'sub_xyz1.png'],
+//         ["name" => "Sub XYZ 2", "parent_category" => "XYZ", 'image' => 'sub_xyz2.png'],
+//         ["name" => "Sub ABC 1", "parent_category" => "ABC", 'image' => 'sub_abc1.png'],
+//         ["name" => "Sub ABC 2", "parent_category" => "ABC", 'image' => 'sub_abc2.png'],
+//         ["name" => "Sub PQR 1", "parent_category" => "PQR", 'image' => 'sub_pqr1.png'],
+//         ["name" => "Sub PQR 2", "parent_category" => "PQR", 'image' => 'sub_pqr2.png'],
+//         ["name" => "Sub PQR 101", "parent_category" => "p101", 'image' => 'sub_pqr1_101.png'],
+//         ["name" => "Sub PQR 102", "parent_category" => "p102", 'image' => 'sub_pqr2_102.png'],
+//     ];
+
+//     $categoryMap = [];
+
+    // foreach ($categories as $cat) {
+    //     if ($cat['parent_category']) {
+    //         // Check if parent category already exists or was created earlier
+    //         $parent = $categoryMap[$cat['parent_category']] ??
+    //             Category::firstOrCreate(
+    //                 ['name' => $cat['parent_category'], 'parent_id' => null],
+    //                 ['image' => 'default.png']
+    //             );
+
+    //         $category = Category::firstOrCreate(
+    //             ['name' => $cat['name'], 'parent_id' => $parent->id],
+    //             ['image' => $cat['image']]
+    //         );
+
+    //         $categoryMap[$cat['name']] = $category;
+    //     } else {
+    //         // Parent category (no parent_id)
+    //         $category = Category::firstOrCreate(
+    //             ['name' => $cat['name'], 'parent_id' => null],
+    //             ['image' => $cat['image']]
+    //         );
+
+    //         $categoryMap[$cat['name']] = $category;
+    //     }
+    // }
+
+//     return " Categories Seeded Successfully!";
+// });

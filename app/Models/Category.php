@@ -9,6 +9,7 @@ class Category extends Model
 {
     use HasFactory;
     protected $fillable = ['name', 'parent_id', 'image'];
+    // protected $table = 'old_categories';
 
     public function children()
     {
