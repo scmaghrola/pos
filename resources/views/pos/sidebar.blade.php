@@ -1,5 +1,5 @@
 <div class="sidebar p-3">
-    <h5 class="text-primary mb-4">Insight CRM</h5>
+    <h5 class="text-primary mb-4">POS</h5>
     <nav class="nav flex-column">
         <ul class="list-unstyled">
 
