@@ -12,6 +12,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\UserPermissionController;
+use App\Http\Controllers\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +54,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('/test-auth', function () {
         return auth()->check() ? 'Logged in' : 'Not logged in';
     });
+
 
     // ---------------- Super Admin Routes -----------------
     Route::middleware(['role:Super Admin'])->group(function () {
@@ -166,6 +168,10 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('orders', [OrderController::class, 'index'])->name('orders.list');
     Route::get('orders/{order}', [OrderController::class, 'show'])->name('orders.view');
     Route::delete('orders/{order}', [OrderController::class, 'destroy'])->name('orders.delete');
+
+    
+    Route::post('/razorpay/pay', [PaymentController::class,'createOrder'])->name('razorpay.order');
+    Route::post('/razorpay/callback', [PaymentController::class,'callback'])->name('razorpay.callback');
 });
 
 // Route::get('/seed-categories', function () {
